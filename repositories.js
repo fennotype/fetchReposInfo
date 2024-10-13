@@ -5,12 +5,12 @@ const pool = require("./db");
 async function fetchReposInfo() {
     console.log(`start search...`)
     try {
-        const response = await axios.get(`https://api.github.com/search/repositories?q=stars:>1+language:nodejs&sort=stars&order=desc`)
+        const response = await axios.get(`https://api.github.com/search/repositories?q=stars:>1+language:javascript&sort=stars&order=desc`)
         const result = response.data.items;
         // console.log(result)
         await SaveReposInfo(result);
     } catch (error) {
-        console.error(`пизда из-за этой твари:`+`  ` + error) //поменять вывод ошибки
+        console.error(`ошибкка:`+`  ` + error) 
     }
 }
 
@@ -39,7 +39,7 @@ async function SaveReposInfo(result) {
 
 
 
-const interval = 1 * 60 * 1000;
+const interval = 5 * 60 * 1000;
 fetchReposInfo();
 setInterval(fetchReposInfo, interval);
 module.exports = fetchReposInfo;
