@@ -13,14 +13,14 @@ app.get(`/repositories`, async (req, res) => {
     }
 })
 
-app.get(`/repositories/:params`, async (req,res)=>{
-    const {params} = req.params;
+app.get(`/repositories/:ReposIdOrLanguage`, async (req,res)=>{
+    const {ReposIdOrLanguage} = req.params;
     let result
     try{
-        if(!isNaN(params)){
-            result = await pool.query(`SELECT * FROM repositories WHERE id=$1`,[params])
+        if(!isNaN(ReposIdOrLanguage)){
+            result = await pool.query(`SELECT * FROM repositories WHERE id=$1`,[ReposIdOrLanguage])
         }else{
-            result = await pool.query(`SELECT * FROM repositories WHERE language=$1`,[params])
+            result = await pool.query(`SELECT * FROM repositories WHERE language=$1`,[ReposIdOrLanguage])
         }
         if(result.rows.length > 0 ){
             res.json(result.rows)
@@ -32,22 +32,22 @@ app.get(`/repositories/:params`, async (req,res)=>{
     }
 })
 
-let syncInterval;
-const startSyncInterval = () => { 
-    clearInterval(syncInterval)
-    syncInterval = setInterval(fetchReposInfo, 5 * 60 * 1000)
-}
-
-app.post(`/sync`, async (Req, res) => {
-    console.log('присвятой синхрон работает');
-    try {
-        startSyncInterval()
-        await fetchReposInfo()
-        res.json({ Message: `синхронизация началась` })
-    } catch (error) {
-        console.error(`syncInterval failed` + ` ` + error)
+    let syncInterval;
+    const startSyncInterval = () => { 
+        clearInterval(syncInterval)
+        syncInterval = setInterval(fetchReposInfo, 5 * 60 * 1000)
+        console.log(`синхронизация началась`)
     }
-})
+
+    app.post(`/sync`, async (Req, res) => {
+        try {
+            startSyncInterval()
+            await fetchReposInfo()
+            res.json({ Message: `синхронизация началась` })
+        } catch (error) {
+            console.error(`syncInterval failed` + ` ` + error)
+        }
+    })
 startSyncInterval()
 
 app.listen(PORT, () => {
@@ -89,4 +89,4 @@ app.listen(PORT, () => {
 //     } catch(error){
 //         console.error(error)
 //     }
-// })     /^\d+$/.test
+// })  
