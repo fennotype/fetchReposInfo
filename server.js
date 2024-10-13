@@ -13,37 +13,27 @@ app.get(`/repositories`, async (req, res) => {
     }
 })
 
-app.get(`/repositories/id/:id`, async (req, res) => {
-    const { id } = req.params;
-    try {
-        const result = await pool.query(`SELECT * FROM repositories WHERE id = $1 OR name = $2`, [id, id])
-        if (result.rows.length > 0) {
-            res.json(result.rows[0])
-        } else {
-            res.status(404).json({ Message: `репозиторий не найдет` })
-        }
-    } catch (error) {
-        console.error(error)
-        res.status(500).json({ Message: `сервер умер` })
-    }
-})
-
-app.get(`/repositories/language/:language`, async(req,res)=>{
-    const {language} = req.params;
+app.get(`/repositories/:params`, async (req,res)=>{
+    const {params} = req.params;
+    let result
     try{
-        const result = await pool.query(`SELECT * FROM repositories WHERE language = $1`, [language])
-        if (result.rows.length > 0){
-            res.json(result.rows)
+        if(!isNaN(params)){
+            result = await pool.query(`SELECT * FROM repositories WHERE id=$1`,[params])
         }else{
-            res.status(404).json({Message: `репозиторий по языку не найдет`})
+            result = await pool.query(`SELECT * FROM repositories WHERE language=$1`,[params])
         }
-    } catch(error){
+        if(result.rows.length > 0 ){
+            res.json(result.rows)
+        } else{
+            res.json({Message:`репозиторий не найден`})
+        }
+    }catch(error){
         console.error(error)
     }
 })
 
 let syncInterval;
-const startSyncInterval = () => {
+const startSyncInterval = () => { 
     clearInterval(syncInterval)
     syncInterval = setInterval(fetchReposInfo, 5 * 60 * 1000)
 }
@@ -63,3 +53,40 @@ startSyncInterval()
 app.listen(PORT, () => {
     console.log(`Сервер запущен на http://localhost:${PORT}/repositories`);
 });
+
+
+
+
+
+
+
+
+// хз, это теперь рудимент, но выглядит прикольно. оставлю
+// app.get(`/repositories/id/:id`, async (req, res) => {
+//     const { id } = req.params;
+//     try {
+//         const result = await pool.query(`SELECT * FROM repositories WHERE id = $1 OR name = $2`, [id, id])
+//         if (result.rows.length > 0) {
+//             res.json(result.rows[0])
+//         } else {
+//             res.status(404).json({ Message: `репозиторий не найдет` })
+//         }
+//     } catch (error) {
+//         console.error(error)
+//         res.status(500).json({ Message: `сервер умер` })
+//     }
+// })
+
+// app.get(`/repositories/language/:language`, async(req,res)=>{
+//     const {language} = req.params;
+//     try{
+//         const result = await pool.query(`SELECT * FROM repositories WHERE language = $1`, [language])
+//         if (result.rows.length > 0){
+//             res.json(result.rows)
+//         }else{
+//             res.status(404).json({Message: `репозиторий по языку не найдет`})
+//         }
+//     } catch(error){
+//         console.error(error)
+//     }
+// })     /^\d+$/.test
