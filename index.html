@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск репозиториев</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+        }
+        .search-box {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .error {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Поиск репозиториев</h1>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="ID или название репозитория" oninput="searchRepos()">
+        <button onclick="searchRepos()">Поиск</button>
+    </div>
+
+    <div class="results" id="results"></div>
+
+    <table id="reposTable" style="display: none;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Ссылка</th>
+                <th>Описание</th>
+                <th>Язык</th>
+                <th>Количество звезд</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    // Функция для загрузки всех репозиториев при старте страницы
+    window.onload = async function() {
+        await loadAllRepos();
+    };
+
+    async function loadAllRepos() {
+        const reposTable = document.getElementById('reposTable');
+        const tableBody = reposTable.querySelector('tbody');
+        const resultsDiv = document.getElementById('results');
+
+        // Скрыть таблицу и очистить результаты
+        reposTable.style.display = 'none';
+        tableBody.innerHTML = '';
+        resultsDiv.innerHTML = '';
+
+        const url = `http://localhost:3000/repositories`; // Путь для получения всех репозиториев
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            console.log('Данные с сервера для всех репозиториев:', JSON.stringify(data, null, 2)); // Логирование данных
+
+            if (data.Message) {
+                resultsDiv.innerHTML = `<p class='error'>${data.Message}</p>`;
+            } else {
+                displayRepos(data); // Показываем все репозитории
+            }
+        } catch (error) {
+            resultsDiv.innerHTML = "<p class='error'>Ошибка при загрузке данных. Попробуйте позже.</p>";
+        }
+    }
+
+    async function searchRepos() {
+        const searchInput = document.getElementById('searchInput').value;
+        const resultsDiv = document.getElementById('results');
+        const reposTable = document.getElementById('reposTable');
+        const tableBody = reposTable.querySelector('tbody');
+
+        // Если поле поиска пустое, загружаем все репозитории
+        if (!searchInput) {
+            await loadAllRepos();
+            return;
+        }
+
+        // Очистить таблицу и скрыть её до получения новых данных
+        reposTable.style.display = 'none';
+        tableBody.innerHTML = '';
+        resultsDiv.innerHTML = '';
+
+        const url = `http://localhost:3000/repositories/${searchInput}`; // Путь для поиска репозиториев
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            console.log('Данные с сервера для поиска:', JSON.stringify(data, null, 2)); // Логирование данных
+
+            if (data.Message) {
+                resultsDiv.innerHTML = `<p class='error'>${data.Message}</p>`;
+            } else {
+                displayRepos(data); // Показываем результат поиска
+            }
+        } catch (error) {
+            resultsDiv.innerHTML = "<p class='error'>Ошибка при поиске. Попробуйте позже.</p>";
+        }
+    }
+
+    function displayRepos(repos) {
+        const reposTable = document.getElementById('reposTable');
+        const tableBody = reposTable.querySelector('tbody');
+
+        console.log('Данные для отображения:', repos);
+
+        // Заполнение таблицы данными о репозиториях
+        repos.forEach(repo => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${repo.id}</td>
+                <td>${repo.name}</td>
+                <td><a href="${repo.html_url}" target="_blank">${repo.html_url}</a></td>
+                <td>${repo.description || 'Нет описания'}</td>
+                <td>${repo.language}</td>
+                <td>${repo.stargazers_count}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Показываем таблицу после загрузки данных
+        reposTable.style.display = 'table';
+    }
+</script>
+
+</body>
+</html>
