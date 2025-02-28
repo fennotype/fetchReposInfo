@@ -32,22 +32,22 @@ app.get(`/repositories/:ReposIdOrLanguage`, async (req,res)=>{
     }
 })
 
-    let syncInterval;
-    const startSyncInterval = () => { 
-        clearInterval(syncInterval)
-        syncInterval = setInterval(fetchReposInfo, 5 * 60 * 1000)
-        console.log(`синхронизация началась`)
-    }
+    // let syncInterval;
+    // const startSyncInterval = () => { 
+    //     clearInterval(syncInterval)
+    //     syncInterval = setInterval(fetchReposInfo, 5 * 60 * 1000)
+    //     console.log(`синхронизация началась`)
+    // }
 
-    app.post(`/sync`, async (Req, res) => {
-        try {
-            startSyncInterval()
-            await fetchReposInfo()
-            res.json({ Message: `синхронизация началась` })
-        } catch (error) {
-            console.error(`syncInterval failed` + ` ` + error)
-        }
-    })
+    // app.post(`/sync`, async (Req, res) => {
+    //     try {
+    //         startSyncInterval()
+    //         await fetchReposInfo()
+    //         res.json({ Message: `синхронизация началась` })
+    //     } catch (error) {
+    //         console.error(`syncInterval failed` + ` ` + error)
+    //     }
+    // })
 startSyncInterval()
 
 app.listen(PORT, () => {
@@ -62,6 +62,8 @@ app.listen(PORT, () => {
 
 
 // хз, это теперь рудимент, но выглядит прикольно. оставлю
+
+
 // app.get(`/repositories/id/:id`, async (req, res) => {
 //     const { id } = req.params;
 //     try {
